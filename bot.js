@@ -1,9 +1,26 @@
 require('dotenv').config();
-const { Telegraf } = require('telegraf');
+const { Telegraf, Markup } = require('telegraf');
 const api = require('covid19-api');
+const COUNTRIES_LIST = require('./constants');
+// const Markup = require('telegraf/src/markup');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
-bot.start((ctx) => ctx.reply(`Привет ${ctx.message.from.first_name}`));
+bot.start((ctx) => ctx.reply(`
+Привет ${ctx.message.from.first_name}!😉
+Узнай статистику по Covid-19.
+Введи страну на английском языке и получи информацию.
+Посмотреть весь список стран можно командой /help
+`, 
+    Markup.keyboard([
+      ['US', 'Russia'],
+      ['Germany', 'Italy'],
+      ['Ukraine', 'Kazakhstan'],
+    ])
+    .resize()
+  )
+);
+
+bot.help((ctx) => ctx.reply(COUNTRIES_LIST));
 
 bot.on('text', async (ctx) => {
   let data = {};
@@ -19,12 +36,10 @@ bot.on('text', async (ctx) => {
   `;
   ctx.reply(formatData);
   } catch {
-    console.warn('Error');
-    ctx.reply('Ошибка! Такой страны не существует.');
+    ctx.reply('Ошибка, ввод не верен! Попробуйте ввести на "eng" или обратитесь к /help.');
   }
 });
 
-bot.hears('hi', (ctx) => ctx.reply('Hey there'));
 bot.launch();
 console.log('Бот запущен');
 
